@@ -2,9 +2,9 @@ module data_memory (
     input clock,
     input memwrite,
     input memread,
-    input [31:0] address,
-    input [31:0] writedata,
-    output reg [31:0] readdata
+    input [64:0] address,
+    input [64:0] writedata,
+    output reg [64:0] readdata
 );
 
   reg [31:0] memory[255];

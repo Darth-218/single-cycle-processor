@@ -4,8 +4,8 @@ module data_memory_test;
   reg we;
   reg re;
   reg [31:0] addr;
-  reg [31:0] wdata;
-  wire [31:0] rdata;
+  reg [63:0] wdata;
+  wire [63:0] rdata;
 
   data_memory DMEM (
       .clock(clk),
