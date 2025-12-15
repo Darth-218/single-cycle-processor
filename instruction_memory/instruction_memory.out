@@ -1,0 +1,57 @@
+#! /usr/bin/vvp
+:ivl_version "12.0 (stable)" "(v12_0-dirty)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "/usr/lib/ivl/system.vpi";
+:vpi_module "/usr/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/usr/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/usr/lib/ivl/v2005_math.vpi";
+:vpi_module "/usr/lib/ivl/va_math.vpi";
+S_0x55c80d5e5b50 .scope module, "instruction_memory_test" "instruction_memory_test" 2 1;
+ .timescale 0 0;
+v0x55c80d5f9200_0 .var "addr", 63 0;
+v0x55c80d5f92c0_0 .net "instr", 31 0, L_0x55c80d5f96e0;  1 drivers
+S_0x55c80d5e5ce0 .scope module, "IMEM" "instruction_memory" 2 7, 3 1 0, S_0x55c80d5e5b50;
+ .timescale 0 0;
+    .port_info 0 /INPUT 64 "address";
+    .port_info 1 /OUTPUT 32 "instruction";
+L_0x55c80d5f96e0 .functor BUFZ 32, L_0x55c80d5f9360, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+v0x55c80d5e3f00_0 .net *"_ivl_0", 31 0, L_0x55c80d5f9360;  1 drivers
+v0x55c80d5f8c50_0 .net *"_ivl_3", 7 0, L_0x55c80d5f9430;  1 drivers
+v0x55c80d5f8d30_0 .net *"_ivl_4", 9 0, L_0x55c80d5f9550;  1 drivers
+L_0x7f4363cb7018 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x55c80d5f8df0_0 .net *"_ivl_7", 1 0, L_0x7f4363cb7018;  1 drivers
+v0x55c80d5f8ed0_0 .net "address", 63 0, v0x55c80d5f9200_0;  1 drivers
+v0x55c80d5f9000_0 .net "instruction", 31 0, L_0x55c80d5f96e0;  alias, 1 drivers
+v0x55c80d5f90e0 .array "memory", 254 0, 31 0;
+L_0x55c80d5f9360 .array/port v0x55c80d5f90e0, L_0x55c80d5f9550;
+L_0x55c80d5f9430 .part v0x55c80d5f9200_0, 2, 8;
+L_0x55c80d5f9550 .concat [ 8 2 0 0], L_0x55c80d5f9430, L_0x7f4363cb7018;
+    .scope S_0x55c80d5e5ce0;
+T_0 ;
+    %vpi_call 3 9 "$readmemh", "instructions.mem", v0x55c80d5f90e0 {0 0 0};
+    %end;
+    .thread T_0;
+    .scope S_0x55c80d5e5b50;
+T_1 ;
+    %pushi/vec4 0, 0, 64;
+    %store/vec4 v0x55c80d5f9200_0, 0, 64;
+    %vpi_call 2 14 "$monitor", "Time=%0t | Addr=%0d | Instr=0x%h", $time, v0x55c80d5f9200_0, v0x55c80d5f92c0_0 {0 0 0};
+    %delay 10, 0;
+    %pushi/vec4 4, 0, 64;
+    %store/vec4 v0x55c80d5f9200_0, 0, 64;
+    %vpi_call 2 16 "$monitor", "Time=%0t | Addr=%0d | Instr=0x%h", $time, v0x55c80d5f9200_0, v0x55c80d5f92c0_0 {0 0 0};
+    %delay 10, 0;
+    %pushi/vec4 8, 0, 64;
+    %store/vec4 v0x55c80d5f9200_0, 0, 64;
+    %vpi_call 2 18 "$monitor", "Time=%0t | Addr=%0d | Instr=0x%h", $time, v0x55c80d5f9200_0, v0x55c80d5f92c0_0 {0 0 0};
+    %delay 10, 0;
+    %vpi_call 2 19 "$finish" {0 0 0};
+    %end;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "instruction_memory_test.v";
+    "instruction_memory.v";
