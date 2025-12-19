@@ -1,20 +1,20 @@
 module data_memory (
     input clock,
-    input memwrite,
-    input memread,
+    input mem_write,
+    input mem_read,
     input [64:0] address,
-    input [64:0] writedata,
-    output reg [64:0] readdata
+    input [64:0] write_data,
+    output reg [64:0] read_data
 );
 
   reg [31:0] memory[255];
 
   always @(posedge clock) begin
-    if (memwrite) begin
-      memory[address[9:2]] <= writedata;
+    if (mem_write) begin
+      memory[address[9:2]] <= write_data;
     end
-    if (memread) begin
-      readdata <= memory[address[9:2]];
+    if (mem_read) begin
+      read_data <= memory[address[9:2]];
     end
   end
 endmodule
