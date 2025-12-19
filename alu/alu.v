@@ -1,34 +1,34 @@
-module alu(
-    input wire [63:0] A, B,
+module alu (
+    // TODO: Change input names
+    input wire [63:0] rs1_data,
+    rs2_data,
     input wire [3:0] op,
-    output reg [63:0] ALUOut,
-    output reg  zero_flag
+    output reg [63:0] alu_out,
+    output reg zero
 );
-    always @(*) begin
-        case(op)
-            4'b0000: ALUOut = A + B;               // Addition
-            4'b0001: ALUOut = A - B;               // Subtraction
-            4'b0010: ALUOut = A & B;               // Bitwise AND
-            4'b0011: ALUOut = A | B;               // Bitwise OR
-            4'b0100: ALUOut = A ^ B;               // Bitwise XOR
-            4'b0101: ALUOut = ~(A | B);            // Bitwise NOR
-            4'b0110: ALUOut = A << 1;              // Logical left shift
-            4'b0111: ALUOut = A >> 1;              // Logical right shift
-            4'b1000: ALUOut = $signed(A) >>> 1;    // Arithmetic right shift
-            4'b1001: ALUOut = (A < B) ? 64'b1 : 64'b0; // Set on less than
-            4'b1010: ALUOut = B;                   // Pass B fix
-            4'b1011: ALUOut = A;                   // Pass A
-            4'b1100: ALUOut = ~A;                  // Bitwise NOT A
-            4'b1101: ALUOut = ~B;                  // Bitwise NOT B fix
-            4'b1110: ALUOut = A * B;               // Multiplication
-            4'b1111: ALUOut = A / B;               // Division
-            default: ALUOut = 64'b0;               // Default case
-        endcase
-        
-        // Set zero_flag
-        if (ALUOut == 64'b0)
-            zero_flag = 1'b1;
-        else
-            zero_flag = 1'b0;
-    end
+  always @(*) begin
+    case (op)
+      4'b0000: alu_out = rs1_data + rs2_data;  // Addition
+      4'b0001: alu_out = rs1_data - rs2_data;  // Subtraction
+      4'b0010: alu_out = rs1_data & rs2_data;  // Bitwise AND
+      4'b0011: alu_out = rs1_data | rs2_data;  // Bitwise OR
+      4'b0100: alu_out = rs1_data ^ rs2_data;  // Bitwise XOR
+      4'b0101: alu_out = ~(rs1_data | rs2_data);  // Bitwise NOR
+      4'b0110: alu_out = rs1_data << 1;  // Logical left shift
+      4'b0111: alu_out = rs1_data >> 1;  // Logical right shift
+      4'b1000: alu_out = $signed(rs1_data) >>> 1;  // Arithmetic right shift
+      4'b1001: alu_out = (rs1_data < rs2_data) ? 64'b1 : 64'b0;  // Set on less than
+      4'b1010: alu_out = rs2_data;  // Pass B fix
+      4'b1011: alu_out = rs1_data;  // Pass A
+      4'b1100: alu_out = ~rs1_data;  // rs2_dataitwise NOT A
+      4'b1101: alu_out = ~rs2_data;  // Bitwise NOT B fix
+      4'b1110: alu_out = rs1_data * rs2_data;  // Multiplication
+      4'b1111: alu_out = rs1_data / rs2_data;  // Division
+      default: alu_out = 64'b0;  // Default case
+    endcase
+
+    // Set zero_flag
+    if (alu_out == 64'b0) zero = 1'b1;
+    else zero = 1'b0;
+  end
 endmodule

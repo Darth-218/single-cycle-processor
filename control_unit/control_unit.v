@@ -1,89 +1,91 @@
 module control_unit (
-    input [6:0] opcode,
-    input [2:0] funct3,
-    input [6:0] funct7,
+    input wire [6:0] opcode,
+    input wire [2:0] funct3,
+    input wire [6:0] funct7,
 
-    output reg       RegWrite,
-    output reg       MemRead,
-    output reg       MemWrite,
-    output reg       MemToReg,
-    output reg       Branch,
-    output reg       ALUSrc,
-    output reg [3:0] ALUctl
+    output reg       reg_write,
+    output reg       mem_read,
+    output reg       mem_write,
+    output reg       mem_to_reg,
+    output reg       branch,
+    output reg       alu_src,
+    output reg [3:0] alu_ctl
 );
 
-  // TODO: Understand
   localparam logic [6:0]
-    OpRtype  = 7'b0110011,
-    OpLoad   = 7'b0000011,
-    OpStore  = 7'b0100011,
-    OpBranch = 7'b1100011,
-    OpItype  = 7'b0010011;
+        OpRtype  = 7'b0110011,
+        OpLoad   = 7'b0000011,
+        OpStore  = 7'b0100011,
+        OpBranch = 7'b1100011,
+        OpItype  = 7'b0010011;
 
   localparam logic [3:0]
-    ALUand = 4'b0000,
-    ALUor  = 4'b0001,
-    ALUadd = 4'b0010,
-    ALUsub = 4'b0110,
-    ALUslt = 4'b0111;
+        ALUAnd = 4'b0000,
+        ALUOr  = 4'b0001,
+        ALUAdd = 4'b0010,
+        ALUSub = 4'b0110,
+        ALUSlt = 4'b0111;
 
   always @(*) begin
-    /* defaults */
-    RegWrite = 1'b0;
-    MemRead  = 1'b0;
-    MemWrite = 1'b0;
-    MemToReg = 1'b0;
-    Branch   = 1'b0;
-    ALUSrc   = 1'b0;
-    ALUctl   = ALUadd;
+    // Defaults
+    reg_write = 1'b0;
+    mem_read  = 1'b0;
+    mem_write = 1'b0;
+    mem_to_reg = 1'b0;
+    branch    = 1'b0;
+    alu_src   = 1'b0;
+    alu_ctl   = ALUAdd;
 
     case (opcode)
-
+      // R-type instructions
       OpRtype: begin
-        RegWrite = 1'b1;
+        reg_write = 1'b1;
         case (funct3)
-          3'b000:  ALUctl = (funct7 == 7'b0100000) ? ALUsub : ALUadd;
-          3'b111:  ALUctl = ALUand;
-          3'b110:  ALUctl = ALUor;
-          3'b010:  ALUctl = ALUslt;
-          default: ALUctl = ALUadd;
+          3'b000:  alu_ctl = (funct7 == 7'b0100000) ? ALUSub : ALUAdd;
+          3'b111:  alu_ctl = ALUAnd;
+          3'b110:  alu_ctl = ALUOr;
+          3'b010:  alu_ctl = ALUSlt;
+          default: alu_ctl = ALUAdd;
         endcase
       end
 
+      // Load instructions
       OpLoad: begin
-        RegWrite = 1'b1;
-        MemRead  = 1'b1;
-        MemToReg = 1'b1;
-        ALUSrc   = 1'b1;
-        ALUctl   = ALUadd;
+        reg_write = 1'b1;
+        mem_read = 1'b1;
+        mem_to_reg = 1'b1;
+        alu_src = 1'b1;
+        alu_ctl = ALUAdd;
       end
 
+      // Store instructions
       OpStore: begin
-        MemWrite = 1'b1;
-        ALUSrc   = 1'b1;
-        ALUctl   = ALUadd;
+        mem_write = 1'b1;
+        alu_src   = 1'b1;
+        alu_ctl   = ALUAdd;
       end
 
+      // Branch instructions
       OpBranch: begin
-        Branch = 1'b1;
-        ALUctl = ALUsub;
+        branch  = 1'b1;
+        alu_ctl = ALUSub;
       end
 
+      // I-type arithmetic instructions
       OpItype: begin
-        RegWrite = 1'b1;
-        ALUSrc   = 1'b1;
+        reg_write = 1'b1;
+        alu_src   = 1'b1;
         case (funct3)
-          3'b000:  ALUctl = ALUadd;
-          3'b111:  ALUctl = ALUand;
-          3'b110:  ALUctl = ALUor;
-          3'b010:  ALUctl = ALUslt;
-          default: ALUctl = ALUadd;
+          3'b000:  alu_ctl = ALUAdd;
+          3'b111:  alu_ctl = ALUAnd;
+          3'b110:  alu_ctl = ALUOr;
+          3'b010:  alu_ctl = ALUSlt;
+          default: alu_ctl = ALUAdd;
         endcase
       end
 
       default: begin
       end
-
     endcase
   end
 
