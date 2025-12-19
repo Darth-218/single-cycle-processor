@@ -25,7 +25,7 @@ module tb_immediate_generator;
         // imm = -5 (two's complement)
         instr = 32'b111111111011_00000_000_00001_0010011;
         #5;
-        $display("%0t\t%h\t\t%0d (Expected: -5)", $time, instr, imm);
+        $display("%0t\t%h\t\t%0d (Expected: -5)", $time, instr, $signed(imm));
 
         // -------------------------------------------------
         // Test 3: S-type (sd x3, 16(x0))
