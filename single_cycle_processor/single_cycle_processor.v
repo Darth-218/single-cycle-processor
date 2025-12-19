@@ -46,10 +46,10 @@ module single_cycle_processor (
       .rs2_data(rs2_addr)
   );
 
-  // immediate_generator IG (
-  //     .imm(imm),
-  //     .extended_imm(imm_ext)
-  // );
+  immediate_generator IG (
+      .instruction(instruction),
+      .immediate  (immediate)
+  );
 
   control_unit CU (
       .opcode(instruction[6:0]),
