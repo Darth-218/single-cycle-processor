@@ -20,7 +20,7 @@ module single_cycle_processor (
   wire [4:0] rs1_address, rs2_address, rd_address;
   wire [63:0] rs1_data, rs2_data, write_data;
 
-  wire reg_write, mem_read, mem_write, mem_to_reg, alu_src, branch;
+  wire reg_write, mem_read, mem_write, mem_to_reg, alu_src;
 
   wire [3:0] alu_op;
   wire [3:0] alu_ctl;
@@ -72,7 +72,7 @@ module single_cycle_processor (
   alu ALU (
       .rs1_data(rs1_data),
       .rs2_data(rs2_data),
-      .operation(alu_op),
+      .alu_ctl(alu_op),
       .alu_out(alu_out),
       .zero(zero)
   );
