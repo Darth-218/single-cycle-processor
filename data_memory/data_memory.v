@@ -2,7 +2,7 @@ module data_memory (
     input clock,
     input mem_write,
     input mem_read,
-    input [31:0] address,
+    input [63:0] address,
     input [63:0] write_data,
     output reg [63:0] read_data
 );
