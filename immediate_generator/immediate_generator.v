@@ -1,6 +1,6 @@
 module immediate_generator (
     input  wire [31:0] instruction,
-    output reg  [63:0] immediate
+    output reg  [63:0] imm
 );
 
   wire [6:0] opcode;
@@ -11,17 +11,17 @@ module immediate_generator (
 
       // I-type: addi, andi, ori, xori, ld
       7'b0010011, 7'b0000011: begin
-        immediate = {{52{instruction[31]}}, instr[31:20]};
+        imm = {{52{instruction[31]}}, instruction[31:20]};
       end
 
       // S-type: sd
       7'b0100011: begin
-        immediate = {{52{instruction[31]}}, instr[31:25], instr[11:7]};
+        imm = {{52{instruction[31]}}, instruction[31:25], instruction[11:7]};
       end
 
       // B-type: beq
       7'b1100011: begin
-        immediate = {
+        imm = {
           {51{instruction[31]}},
           instruction[31],
           instruction[7],
@@ -32,7 +32,7 @@ module immediate_generator (
       end
 
       default: begin
-        immediate = 64'b0;
+        imm = 64'b0;
       end
     endcase
   end

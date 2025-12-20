@@ -9,7 +9,7 @@ module register_file (
     output wire [63:0] rs2_data      // Output of rs2
 );
 
-  reg [63:0] registers[31:0];  // Creates 32 of 64bit registers
+  reg [63:0] registers[31];  // Creates 32 of 64bit registers
 
   // Read
   assign rs1_data = (rs1_address == 0) ? 64'b0 : registers[rs1_address];
