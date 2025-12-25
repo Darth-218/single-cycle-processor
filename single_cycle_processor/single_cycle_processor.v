@@ -1,11 +1,11 @@
 module single_cycle_processor (
     input wire clock,
     input wire reset,
-    output logic [31:0] out_pc,
-    output logic [31:0] out_instruction,
-    output logic out_reg_write,
-    output logic [4:0] out_rd_address,
-    output logic [31:0] out_write_data
+    output reg [31:0] out_pc,
+    output reg [31:0] out_instruction,
+    output reg out_reg_write,
+    output reg [4:0] out_rd_address,
+    output reg [31:0] out_write_data
 );
 
   wire [63:0] pc;
