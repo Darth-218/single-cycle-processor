@@ -7,7 +7,7 @@ module data_memory (
     output reg [63:0] read_data
 );
 
-  reg [63:0] memory[255];
+  reg [63:0] memory[0:255];
 
   always @(posedge clock) begin
     if (mem_write) begin
