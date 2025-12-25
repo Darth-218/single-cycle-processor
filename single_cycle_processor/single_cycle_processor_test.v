@@ -2,11 +2,9 @@
 
 module single_cycle_processor_test;
 
-  // Clock and reset
   reg         clock;
   reg         reset;
 
-  // DUT outputs
   wire [31:0] out_pc;
   wire [31:0] out_instruction;
   wire        out_reg_write;
@@ -32,21 +30,21 @@ module single_cycle_processor_test;
 
   // Test sequence
   initial begin
-    // Initialize
     reset = 1;
-
-    // Hold reset for a few cycles
     repeat (2) @(posedge clock);
     reset = 0;
 
-    // Run processor for N cycles
-    repeat (20) @(posedge clock);
-
-    $display("Simulation finished.");
-    $finish;
+    // Run until a halt instruction is detected
+    forever begin
+      @(posedge clock);
+      if (out_instruction == 32'h00000000) begin
+        $display("Halt instruction reached at PC=0x%08h", out_pc);
+        $finish;
+      end
+    end
   end
 
-  // Monitor architectural state every cycle
+  // Monitor outputs
   always @(posedge clock) begin
     if (!reset) begin
       $display("PC=0x%08h | INST=0x%08h | REG_WRITE=%b | RD=%0d | WD=0x%08h", out_pc,
@@ -54,13 +52,17 @@ module single_cycle_processor_test;
     end
   end
 
-  // Optional waveform dump
+  // Waveform dump
   initial begin
     $dumpfile("single_cycle_processor.vcd");
     $dumpvars(0, single_cycle_processor_test);
   end
 
 endmodule
+
+
+
+
 
 
 
