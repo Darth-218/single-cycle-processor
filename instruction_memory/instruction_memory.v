@@ -3,7 +3,7 @@ module instruction_memory (
     output [31:0] instruction
 );
 
-  reg [31:0] memory[255];
+  reg [31:0] memory[0:255];
 
   initial begin
     $readmemb("instructions.mem", memory);
