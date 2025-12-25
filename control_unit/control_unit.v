@@ -14,7 +14,7 @@ module control_unit (
 );
 
   // Opcodes
-  localparam logic [6:0]
+  localparam [6:0]
     OpRtype  = 7'b0110011,
     OpItype  = 7'b0010011,
     OpLoad   = 7'b0000011,
@@ -26,7 +26,7 @@ module control_unit (
     OpAuipc  = 7'b0010111;
 
   // ALU operations
-  localparam logic [3:0]
+  localparam [3:0]
     AluAdd  = 4'b0010,
     AluSub  = 4'b0110,
     AluAnd  = 4'b0000,
