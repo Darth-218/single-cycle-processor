@@ -23,7 +23,7 @@ module control_unit_test;
   assign funct7 = instr[31:25];
 
   // Main control unit
-  main_control dut (
+  main_control dut_main (
       .opcode(opcode),
       .reg_write(reg_write),
       .mem_read(mem_read),
@@ -37,7 +37,7 @@ module control_unit_test;
   );
 
   // ALU control unit
-  alu_control dut (
+  alu_control dut_alu (
       .alu_op(alu_op),
       .funct3(funct3),
       .funct7(funct7),
