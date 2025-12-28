@@ -1,11 +1,6 @@
 module single_cycle_processor (
     input wire clock,
-    input wire reset,
-    output reg [31:0] out_pc,
-    output reg [31:0] out_instruction,
-    output reg out_reg_write,
-    output reg [4:0] out_rd_address,
-    output reg [31:0] out_write_data
+    input wire reset
 );
 
   wire [63:0] pc;
@@ -89,13 +84,5 @@ module single_cycle_processor (
       .write_data(write_data),
       .read_data(write_data)
   );
-
-  always @(*) begin
-    out_pc <= pc;
-    out_instruction <= instruction;
-    out_reg_write <= reg_write;
-    out_rd_address <= rd_address;
-    out_write_data <= write_data;
-  end
 
 endmodule
