@@ -15,7 +15,7 @@ module single_cycle_processor (
   wire [31:0] instruction;
   wire [6:0] opcode = instruction[6:0];
   wire [2:0] funct3 = instruction[14:12];
-  wire [6:0] funct7 = instruction[31:25];
+  wire funct7 = instruction[30];
 
   wire [4:0] rs1_address, rs2_address, rd_address;
   wire [63:0] rs1_data, rs2_data, write_data;
@@ -58,22 +58,26 @@ module single_cycle_processor (
 
   control_unit CU (
       .opcode(instruction[6:0]),
-      .funct3(instruction[14:12]),
-      .funct7(instruction[31:25]),
       .reg_write(reg_write),
       .mem_read(mem_read),
       .mem_write(mem_write),
       .mem_to_reg(mem_to_reg),
       .branch(branch),
-      .alu_src(alu_src),
-      .alu_ctl(alu_ctl)
+      .alu_src(alu_src)
+  );
+
+  alu_control AC (
+      .alu_op  (alu_op),
+      .alu_ctrl(alu_ctl),
+      .funct3  (funct3),
+      .funct7  (funct7)
   );
 
   alu ALU (
       .rs1_data(rs1_data),
       .rs2_data(rs2_data),
-      .alu_ctl(alu_op),
-      .alu_out(alu_out),
+      .alu_ctrl(alu_op),
+      .result(alu_out),
       .zero(zero)
   );
 

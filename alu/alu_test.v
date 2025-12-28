@@ -10,10 +10,10 @@ module alu_test;
 
   // Instantiate the ALU
   alu dut (
-      .rs1_data(rs1),
-      .rs2_data(rs2),
-      .alu_ctl(operation),
-      .alu_out(alu_out),
+      .a(rs1),
+      .b(rs2),
+      .alu_ctrl(operation),
+      .result(alu_out),
       .zero(zero)
   );
 

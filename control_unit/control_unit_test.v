@@ -23,7 +23,7 @@ module control_unit_test;
   assign funct7 = instr[31:25];
 
   // Main control unit
-  main_control dut_main (
+  control_unit dut_main (
       .opcode(opcode),
       .reg_write(reg_write),
       .mem_read(mem_read),
@@ -38,61 +38,56 @@ module control_unit_test;
 
   // ALU control unit
   alu_control dut_alu (
-      .alu_op(alu_op),
-      .funct3(funct3),
-      .funct7(funct7),
-      .alu_ctl(alu_ctl)
+      .alu_op  (alu_op),
+      .funct3  (funct3),
+      .funct7  (funct7),
+      .alu_ctrl(alu_ctl)
   );
 
   initial begin
-    $display("Type\tInstr\t\tRegWrite\tMemRead\tMemWrite\tMemToReg\tBranch\tALUSrc\tALUctl\tPCSrc\tImmType");
+    $display(
+        "Type\tInstr\t\tRegWrite\tMemRead\tMemWrite\tMemToReg\tBranch\tALUSrc\tALUctl\tPCSrc\tImmType");
 
     /* R-type ADD */
     instr = 32'b0000000_00000_00000_000_00000_0110011;
     instr_type = "R";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     /* R-type SUB */
     instr = 32'b0100000_00000_00000_000_00000_0110011;
     instr_type = "R";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     /* LOAD */
     instr = 32'b000000000000_00000_010_00000_0000011;
     instr_type = "I";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     /* STORE */
     instr = 32'b0000000_00000_00000_010_00000_0100011;
     instr_type = "S";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     /* BRANCH (BEQ) */
     instr = 32'b0000000_00000_00000_000_00000_1100011;
     instr_type = "B";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     /* ADDI */
     instr = 32'b000000000000_00000_000_00000_0010011;
     instr_type = "I";
     #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
+    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
     $finish;

@@ -19,12 +19,22 @@ alu.vvp:
 	alu/alu_test.v \
 	-o out/alu.vvp
 
+ac: alu_control.vvp
+
+alu_control.vvp:
+	$(VRLG) $(FLAGS) \
+	alu_control/alu_control.v \
+	alu_control/control_unit_test.v \
+	-o out/cu.vvp
+
 cu: control_unit.vvp
 
 control_unit.vvp:
 	$(VRLG) $(FLAGS) \
 	control_unit/control_unit.v \
 	control_unit/control_unit_test.v \
+	alu_control/alu_control.v \
+	alu_control/alu_control_test.v \
 	-o out/cu.vvp
 
 rf: register_file.vvp
@@ -70,6 +80,7 @@ single_cycle_processor.vvp:
 	register_file/register_file.v \
 	data_memory/data_memory.v \
 	control_unit/control_unit.v \
+	alu_control/alu_control.v \
 	alu/alu.v \
 	single_cycle_processor/single_cycle_processor_test.v \
 	-o out/scp.vvp
