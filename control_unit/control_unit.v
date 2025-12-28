@@ -4,9 +4,7 @@ module control_unit (
     output reg       mem_read,
     output reg       mem_write,
     output reg       mem_to_reg,
-    output reg       branch,
     output reg       alu_src,     // 0=rs2, 1=imm
-    output reg       alu_pc,      // 1=use PC as ALU src1 (AUIPC)
     output reg [1:0] pc_src,      // 00=PC+4, 01=branch, 10=JAL/JALR
     output reg [2:0] imm_type,    // I,S,B,U,J
     output reg [1:0] alu_op
@@ -28,9 +26,7 @@ module control_unit (
     mem_read   = 0;
     mem_write  = 0;
     mem_to_reg = 0;
-    branch     = 0;
     alu_src    = 0;
-    alu_pc     = 0;
     pc_src     = 2'b00;
     imm_type   = 3'b000;
     alu_op     = 2'b00;
@@ -66,7 +62,6 @@ module control_unit (
       end
 
       OP_BRANCH: begin
-        branch   = 1;
         pc_src   = 2'b01;
         imm_type = 3'b010;
         alu_op   = 2'b01;
@@ -95,7 +90,6 @@ module control_unit (
 
       OP_AUIPC: begin
         reg_write = 1;
-        alu_pc    = 1;  // PC + imm
         alu_src   = 1;
         imm_type  = 3'b011;
         alu_op    = 2'b00;

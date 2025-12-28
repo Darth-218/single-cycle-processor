@@ -4,7 +4,7 @@ module data_memory (
     input mem_read,
     input [63:0] address,
     input [63:0] write_data,
-    output reg [63:0] read_data
+    output [63:0] read_data
 );
 
   reg [63:0] memory[0:255];
@@ -13,8 +13,8 @@ module data_memory (
     if (mem_write) begin
       memory[address[9:2]] <= write_data;
     end
-    if (mem_read) begin
-      read_data <= memory[address[9:2]];
-    end
   end
+
+  assign read_data = mem_read ? memory[address[9:2]] : 64'b0;
+
 endmodule

@@ -10,14 +10,14 @@ module single_cycle_processor (
   wire [31:0] instruction;
   wire [ 6:0] opcode = instruction[6:0];
   wire [ 2:0] funct3 = instruction[14:12];
-  wire        funct7 = instruction[30];
+  wire [ 6:0] funct7 = instruction[31:25];
 
   wire [ 4:0] rs1_address = instruction[19:15];
   wire [ 4:0] rs2_address = instruction[24:20];
   wire [ 4:0] rd_address = instruction[11:7];
 
   wire reg_write, mem_read, mem_write, mem_to_reg;
-  wire branch, alu_src;
+  wire alu_src;
   wire [1:0] alu_op;
   wire [1:0] pc_src;
   wire [2:0] imm_type;
@@ -34,9 +34,10 @@ module single_cycle_processor (
   program_counter PC (
       .clock(clock),
       .reset(reset),
-      .branch(branch),
+      .pc_src(pc_src),
       .zero(zero),
       .imm(imm),
+      .alu_result(alu_out),
       .pc_current(pc)
   );
 
@@ -68,7 +69,6 @@ module single_cycle_processor (
       .mem_read(mem_read),
       .mem_write(mem_write),
       .mem_to_reg(mem_to_reg),
-      .branch(branch),
       .alu_src(alu_src),
       .alu_op(alu_op),
       .pc_src(pc_src),
