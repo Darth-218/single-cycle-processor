@@ -6,9 +6,9 @@ module single_cycle_processor_test;
   reg reset;
 
   // Instantiate DUT
-  single_cycle_processor dut (
+  single_cycle_processor cpu (
       .clock(clock),
-      .reset(reset),
+      .reset(reset)
   );
 
   // Clock generation: 10 ns period
@@ -26,8 +26,8 @@ module single_cycle_processor_test;
     // Run until a halt instruction is detected
     forever begin
       @(posedge clock);
-      if (out_instruction == 32'h00000000) begin
-        $display("Halt instruction reached at PC=0x%08h", out_pc);
+      if (cpu.IM.instruction == 32'h00000000) begin
+        $display("Halt instruction reached.");
         $finish;
       end
     end
