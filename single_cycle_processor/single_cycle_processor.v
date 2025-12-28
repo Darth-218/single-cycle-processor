@@ -18,7 +18,7 @@ module single_cycle_processor (
   wire [4:0] rs2_address = instruction[24:20];
   wire [4:0] rd_address = instruction[11:7];
 
-  wire [63:0] rs1_data, rs2_data, write_data;
+  wire [63:0] rs1_data, rs2_data;
 
   wire reg_write, mem_read, mem_write, mem_to_reg, alu_src;
 
@@ -46,7 +46,7 @@ module single_cycle_processor (
       .rs1_address(rs1_address),
       .rs2_address(rs2_address),
       .rd_address(rd_address),
-      .write_data(write_data),
+      .write_data(alu_out),
       .rs1_data(rs1_data),
       .rs2_data(rs2_data)
   );
