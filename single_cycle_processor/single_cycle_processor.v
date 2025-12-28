@@ -4,8 +4,10 @@ module single_cycle_processor (
 );
 
   wire [63:0] pc;
+  wire [1:0] pc_src;
   wire branch;
   wire [63:0] imm;
+  wire [2:0] imm_type;
 
   wire [31:0] instruction;
   wire [6:0] opcode = instruction[6:0];
@@ -58,7 +60,10 @@ module single_cycle_processor (
       .mem_write(mem_write),
       .mem_to_reg(mem_to_reg),
       .branch(branch),
-      .alu_src(alu_src)
+      .alu_src(alu_src),
+      .alu_op(alu_op),
+      .pc_src(pc_src),
+      .imm_type(imm_type)
   );
 
   alu_control AC (
