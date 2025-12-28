@@ -1,5 +1,5 @@
 module alu_control (
-    input      [3:0] alu_op,
+    input      [1:0] alu_op,
     input      [2:0] funct3,
     input            funct7,
     output reg [3:0] alu_ctrl
