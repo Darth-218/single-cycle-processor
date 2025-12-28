@@ -11,6 +11,8 @@ module register_file (
 
   reg [63:0] registers[0:31];  // Creates 32 of 64bit registers
 
+  assign registers[0] = 64'b0;
+
   assign rs1_data = (rs1_address == 0) ? 64'b0 : registers[rs1_address];
   assign rs2_data = (rs2_address == 0) ? 64'b0 : registers[rs2_address];
 
