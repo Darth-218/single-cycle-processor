@@ -22,7 +22,7 @@ module single_cycle_processor (
 
   wire reg_write, mem_read, mem_write, mem_to_reg, alu_src;
 
-  wire [3:0] alu_op;
+  wire [1:0] alu_op;
   wire [3:0] alu_ctl;
   wire [63:0] alu_out;
   wire zero;
@@ -31,6 +31,7 @@ module single_cycle_processor (
       .clock(clock),
       .reset(reset),
       .branch(branch),
+      .zero(zero),
       .imm(imm),
       .pc_current(pc)
   );
@@ -88,7 +89,7 @@ module single_cycle_processor (
       .clock(clock),
       .mem_write(mem_write),
       .mem_read(mem_read),
-      .address(rd_data),
+      .address(rs2_data),
       .write_data(alu_out),
       .read_data(alu_out)
   );

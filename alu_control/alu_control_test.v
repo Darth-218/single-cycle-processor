@@ -1,2 +1,2 @@
-module alu_contorl_test;
+module alu_control_test;
 endmodule
