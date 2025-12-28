@@ -33,7 +33,7 @@ module control_unit (
     alu_pc     = 0;
     pc_src     = 2'b00;
     imm_type   = 3'b000;
-    alu_op     = 2'b00;
+    alu_op     = 2'b10;
 
     case (opcode)
 
