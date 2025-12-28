@@ -76,7 +76,7 @@ module single_cycle_processor (
   alu ALU (
       .rs1_data(rs1_data),
       .rs2_data(rs2_data),
-      .alu_ctrl(alu_op),
+      .alu_ctrl(alu_ctl),
       .result(alu_out),
       .zero(zero)
   );
