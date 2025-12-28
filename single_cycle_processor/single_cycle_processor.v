@@ -14,7 +14,10 @@ module single_cycle_processor (
   wire [2:0] funct3 = instruction[14:12];
   wire funct7 = instruction[30];
 
-  wire [4:0] rs1_address, rs2_address, rd_address;
+  wire [4:0] rs1_address = instruction[19:15];
+  wire [4:0] rs2_address = instruction[24:20];
+  wire [4:0] rd_address = instruction[11:7];
+
   wire [63:0] rs1_data, rs2_data, write_data;
 
   wire reg_write, mem_read, mem_write, mem_to_reg, alu_src;
