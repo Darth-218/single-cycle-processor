@@ -61,7 +61,7 @@ module single_cycle_processor (
       .mem_to_reg(mem_to_reg),
       .branch(branch),
       .alu_src(alu_src),
-      .alu_op(alu_op),
+      .alu_op(2'b10),
       .pc_src(pc_src),
       .imm_type(imm_type)
   );
