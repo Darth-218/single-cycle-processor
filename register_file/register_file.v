@@ -15,11 +15,8 @@ module register_file (
   assign rs1_data = (rs1_address == 0) ? 64'b0 : registers[rs1_address];
   assign rs2_data = (rs2_address == 0) ? 64'b0 : registers[rs2_address];
 
-  initial begin
-    registers[0] <= 64'b0;
-  end
-
   always @(posedge clock) begin
+    registers[0] <= 64'b0;
     if (reg_write && rd_address != 0) begin
       registers[rd_address] <= write_data;
     end
