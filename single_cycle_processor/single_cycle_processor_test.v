@@ -2,24 +2,13 @@
 
 module single_cycle_processor_test;
 
-  reg         clock;
-  reg         reset;
-
-  wire [31:0] out_pc;
-  wire [31:0] out_instruction;
-  wire        out_reg_write;
-  wire [ 4:0] out_rd_address;
-  wire [31:0] out_write_data;
+  reg clock;
+  reg reset;
 
   // Instantiate DUT
   single_cycle_processor dut (
       .clock(clock),
       .reset(reset),
-      .out_pc(out_pc),
-      .out_instruction(out_instruction),
-      .out_reg_write(out_reg_write),
-      .out_rd_address(out_rd_address),
-      .out_write_data(out_write_data)
   );
 
   // Clock generation: 10 ns period
@@ -41,14 +30,6 @@ module single_cycle_processor_test;
         $display("Halt instruction reached at PC=0x%08h", out_pc);
         $finish;
       end
-    end
-  end
-
-  // Monitor outputs
-  always @(posedge clock) begin
-    if (!reset) begin
-      $display("PC=0x%08h | INST=0x%08h | REG_WRITE=%b | RD=%0d | WD=0x%08h", out_pc,
-               out_instruction, out_reg_write, out_rd_address, out_write_data);
     end
   end
 
