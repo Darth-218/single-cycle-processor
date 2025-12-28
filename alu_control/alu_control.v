@@ -1,101 +1,61 @@
-module control_unit_test;
+module alu_control (
+    input      [1:0] alu_op,
+    input      [2:0] funct3,
+    input            funct7_5,
+    output reg [3:0] alu_ctrl
+);
 
-  reg [31:0] instr;
-  reg [7:0] instr_type;  // single character for type: 'R', 'I', 'S', 'B'
+  always @(*) begin
+    case (alu_op)
 
-  wire [6:0] opcode;
-  wire [2:0] funct3;
-  wire [6:0] funct7;
+      // ADD (loads, stores, jumps)
+      2'b00: alu_ctrl = 4'b0000;
 
-  wire reg_write;
-  wire mem_read;
-  wire mem_write;
-  wire mem_to_reg;
-  wire branch;
-  wire alu_src;
-  wire [3:0] alu_ctl;
-  wire [1:0] pc_src;
-  wire [2:0] imm_type;
-  wire [1:0] alu_op;
+      // Branch
+      2'b01: begin
+        case (funct3)
+          3'b000:  alu_ctrl = 4'b0001;  // BEQ
+          3'b001:  alu_ctrl = 4'b0001;  // BNE
+          3'b100:  alu_ctrl = 4'b0101;  // BLT
+          3'b101:  alu_ctrl = 4'b0101;  // BGE
+          3'b110:  alu_ctrl = 4'b1001;  // BLTU
+          3'b111:  alu_ctrl = 4'b1001;  // BGEU
+          default: alu_ctrl = 4'b0000;
+        endcase
+      end
 
-  assign opcode = instr[6:0];
-  assign funct3 = instr[14:12];
-  assign funct7 = instr[31:25];
+      // R-type
+      2'b10: begin
+        case (funct3)
+          3'b000:  alu_ctrl = funct7_5 ? 4'b0001 : 4'b0000;
+          3'b111:  alu_ctrl = 4'b0010;
+          3'b110:  alu_ctrl = 4'b0011;
+          3'b100:  alu_ctrl = 4'b0100;
+          3'b010:  alu_ctrl = 4'b0101;
+          3'b011:  alu_ctrl = 4'b1001;
+          3'b001:  alu_ctrl = 4'b0110;
+          3'b101:  alu_ctrl = funct7_5 ? 4'b1000 : 4'b0111;
+          default: alu_ctrl = 4'b0000;
+        endcase
+      end
 
-  // Main control unit
-  main_control dut_main (
-      .opcode(opcode),
-      .reg_write(reg_write),
-      .mem_read(mem_read),
-      .mem_write(mem_write),
-      .mem_to_reg(mem_to_reg),
-      .branch(branch),
-      .alu_src(alu_src),
-      .pc_src(pc_src),
-      .imm_type(imm_type),
-      .alu_op(alu_op)
-  );
+      // I-type
+      2'b11: begin
+        case (funct3)
+          3'b000:  alu_ctrl = 4'b0000;
+          3'b111:  alu_ctrl = 4'b0010;
+          3'b110:  alu_ctrl = 4'b0011;
+          3'b100:  alu_ctrl = 4'b0100;
+          3'b010:  alu_ctrl = 4'b0101;
+          3'b011:  alu_ctrl = 4'b1001;
+          3'b001:  alu_ctrl = 4'b0110;
+          3'b101:  alu_ctrl = funct7_5 ? 4'b1000 : 4'b0111;
+          default: alu_ctrl = 4'b0000;
+        endcase
+      end
 
-  // ALU control unit
-  alu_control dut_alu (
-      .alu_op(alu_op),
-      .funct3(funct3),
-      .funct7(funct7),
-      .alu_ctl(alu_ctl)
-  );
-
-  initial begin
-    $display("Type\tInstr\t\tRegWrite\tMemRead\tMemWrite\tMemToReg\tBranch\tALUSrc\tALUctl\tPCSrc\tImmType");
-
-    /* R-type ADD */
-    instr = 32'b0000000_00000_00000_000_00000_0110011;
-    instr_type = "R";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    /* R-type SUB */
-    instr = 32'b0100000_00000_00000_000_00000_0110011;
-    instr_type = "R";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    /* LOAD */
-    instr = 32'b000000000000_00000_010_00000_0000011;
-    instr_type = "I";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    /* STORE */
-    instr = 32'b0000000_00000_00000_010_00000_0100011;
-    instr_type = "S";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    /* BRANCH (BEQ) */
-    instr = 32'b0000000_00000_00000_000_00000_1100011;
-    instr_type = "B";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    /* ADDI */
-    instr = 32'b000000000000_00000_000_00000_0010011;
-    instr_type = "I";
-    #1;
-    $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b",
-             instr_type, instr, reg_write,
-             mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
-
-    $finish;
+      default: alu_ctrl = 4'b0000;
+    endcase
   end
-
 endmodule
+

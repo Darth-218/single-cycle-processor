@@ -1,114 +1,107 @@
-module main_control (
+module control_unit (
     input      [6:0] opcode,
     output reg       reg_write,
     output reg       mem_read,
     output reg       mem_write,
     output reg       mem_to_reg,
     output reg       branch,
-    output reg       alu_src,
+    output reg       alu_src,     // 0=rs2, 1=imm
+    output reg       alu_pc,      // 1=use PC as ALU src1 (AUIPC)
     output reg [1:0] pc_src,      // 00=PC+4, 01=branch, 10=JAL/JALR
-    output reg [2:0] imm_type,    // 000=I,001=S,010=B,011=U,100=J
-    output reg [1:0] alu_op       // control signal for ALU control unit
+    output reg [2:0] imm_type,    // I,S,B,U,J
+    output reg [1:0] alu_op
 );
 
-  // Opcodes
   localparam [6:0]
-    OpRtype  = 7'b0110011,
-    OpItype  = 7'b0010011,
-    OpLoad   = 7'b0000011,
-    OpStore  = 7'b0100011,
-    OpBranch = 7'b1100011,
-    OpJal    = 7'b1101111,
-    OpJalr   = 7'b1100111,
-    OpLui    = 7'b0110111,
-    OpAuipc  = 7'b0010111;
+    OP_R     = 7'b0110011,
+    OP_I     = 7'b0010011,
+    OP_LOAD  = 7'b0000011,
+    OP_STORE = 7'b0100011,
+    OP_BRANCH= 7'b1100011,
+    OP_JAL   = 7'b1101111,
+    OP_JALR  = 7'b1100111,
+    OP_LUI   = 7'b0110111,
+    OP_AUIPC = 7'b0010111;
 
   always @(*) begin
-    // Default values
     reg_write  = 0;
     mem_read   = 0;
     mem_write  = 0;
     mem_to_reg = 0;
     branch     = 0;
     alu_src    = 0;
+    alu_pc     = 0;
     pc_src     = 2'b00;
     imm_type   = 3'b000;
-    alu_op     = 2'b00; // default ALU add
+    alu_op     = 2'b00;
 
     case (opcode)
-      // R-type
-      OpRtype: begin
+
+      OP_R: begin
         reg_write = 1;
-        alu_src   = 0;
-        alu_op    = 2'b10; // R-type ALU operation
+        alu_op    = 2'b10;
       end
 
-      // I-type ALU
-      OpItype: begin
+      OP_I: begin
         reg_write = 1;
         alu_src   = 1;
-        imm_type  = 3'b000;  // I-type immediate
-        alu_op    = 2'b11;   // I-type ALU operation
+        imm_type  = 3'b000;
+        alu_op    = 2'b11;
       end
 
-      // Load
-      OpLoad: begin
+      OP_LOAD: begin
         reg_write  = 1;
         mem_read   = 1;
         mem_to_reg = 1;
         alu_src    = 1;
-        imm_type   = 3'b000;  // I-type
-        alu_op     = 2'b00;   // address calculation
+        imm_type   = 3'b000;
+        alu_op     = 2'b00;
       end
 
-      // Store
-      OpStore: begin
+      OP_STORE: begin
         mem_write = 1;
         alu_src   = 1;
-        imm_type  = 3'b001;  // S-type
-        alu_op    = 2'b00;   // address calculation
+        imm_type  = 3'b001;
+        alu_op    = 2'b00;
       end
 
-      // Branch
-      OpBranch: begin
+      OP_BRANCH: begin
         branch   = 1;
-        alu_src  = 0;
         pc_src   = 2'b01;
-        imm_type = 3'b010;  // B-type
-        alu_op   = 2'b01;   // for BEQ/BNE/BLT/etc
+        imm_type = 3'b010;
+        alu_op   = 2'b01;
       end
 
-      // JAL
-      OpJal: begin
+      OP_JAL: begin
         reg_write = 1;
         pc_src    = 2'b10;
-        imm_type  = 3'b100; // J-type
+        imm_type  = 3'b100;
       end
 
-      // JALR
-      OpJalr: begin
+      OP_JALR: begin
         reg_write = 1;
         alu_src   = 1;
         pc_src    = 2'b10;
-        imm_type  = 3'b000; // I-type
-        alu_op    = 2'b00;  // add
+        imm_type  = 3'b000;
+        alu_op    = 2'b00;
       end
 
-      // LUI
-      OpLui: begin
+      OP_LUI: begin
         reg_write = 1;
         alu_src   = 1;
-        imm_type  = 3'b011;  // U-type
-        alu_op    = 2'b00;   // add
+        imm_type  = 3'b011;
+        alu_op    = 2'b00;   // ALU passes imm
       end
 
-      // AUIPC
-      OpAuipc: begin
+      OP_AUIPC: begin
         reg_write = 1;
+        alu_pc    = 1;  // PC + imm
         alu_src   = 1;
-        imm_type  = 3'b011;  // U-type
-        alu_op    = 2'b00;   // add
+        imm_type  = 3'b011;
+        alu_op    = 2'b00;
       end
+
     endcase
   end
 endmodule
+
