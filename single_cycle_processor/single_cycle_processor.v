@@ -58,6 +58,7 @@ module single_cycle_processor (
 
   immediate_generator IG (
       .instruction(instruction),
+      .imm_type(imm_type),
       .imm(imm)
   );
 
