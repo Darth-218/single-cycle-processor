@@ -58,7 +58,6 @@ module single_cycle_processor (
 
   immediate_generator IG (
       .instruction(instruction),
-      .imm_type(imm_type),
       .imm(imm)
   );
 
@@ -78,7 +77,7 @@ module single_cycle_processor (
   alu_control AC (
       .alu_op  (alu_op),
       .funct3  (funct3),
-      .funct7_5(funct7),
+      .funct7  (funct7),
       .alu_ctrl(alu_ctl)
   );
 
