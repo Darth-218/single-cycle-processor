@@ -88,9 +88,9 @@ module single_cycle_processor (
       .clock(clock),
       .mem_write(mem_write),
       .mem_read(mem_read),
-      .address(rs2_data),
-      .write_data(write_data),
-      .read_data(write_data)
+      .address(rd_data),
+      .write_data(alu_out),
+      .read_data(alu_out)
   );
 
 endmodule
