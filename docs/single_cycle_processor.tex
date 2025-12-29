@@ -14,8 +14,9 @@
 \usetheme{Madrid}
 \usecolortheme{whale}
 
+% Fix for author lines in PDF metadata
 \title{Design and Implementation of a Single-Cycle RISC-V Processor}
-\author{Ahmed Mohamed Abdelmaboud \\ Yahia Hany Gaber \\ Omar Hesham Desouky \\ Mahmoud Khaled \\ Mazen Ahmed}
+\author{Ahmed Mohamed Abdelmaboud \and Yahia Hany Gaber \and Omar Hesham Desouky \and Mahmoud Khaled \and Mazen Ahmed}
 \institute{Computer Architecture Project}
 \date{}
 
@@ -108,118 +109,70 @@
 % ========== DATAPATH DESIGN ==========
 \begin{frame}{Datapath Design}
     \begin{center}
-        \includegraphics[width=0.85\textwidth]{}
-\begin{figure}
-            \centering
-            \includegraphics[width=0.5\linewidth]{Screenshot 2025-12-29 at 01-58-00 311 - Project-V2-1.pdf.png}
-            \label{fig:placeholder}
-        \end{figure}
-                
+        % Use one of these lines based on which file you have:
+        \includegraphics[width=0.6\textwidth]{Screenshot 2025-12-29 at 01-58-00 311 - Project-V2-1.pdf.png} % Option 1: Simple filename
+        % \includegraphics[width=0.8\textwidth]{Screenshot 2025-12-29 at 01-58-00 311 - Project-V2-1.pdf.png} % Option 2: Original filename
+        
         \vspace{0.3cm}
         \footnotesize\textbf{Fig. 1:} Single-Cycle RISC-V Datapath
     \end{center}
     
-    \begin{block}{Components}
-        \begin{itemize}
-            \item Program Counter (PC)
-            \item Instruction Memory
-            \item Register File
-            \item Immediate Generator
-            \item Arithmetic Logic Unit (ALU)
-            \item Data Memory
-            \item Control Unit
-            \item Branch Logic
-        \end{itemize}
-    \end{block}
 \end{frame}
 
-% ========== DESIGN METHODOLOGY ==========
-\begin{frame}{Design Methodology}
-    \begin{columns}[T]
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Modular Approach}
-                \begin{itemize}
-                    \item Each component as separate Verilog module
-                    \item Individual testbenches for verification
-                    \item Integrated into top-level CPU module
-                \end{itemize}
-            \end{block}
-        \end{column}
-        
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Control Unit Design}
-                \begin{itemize}
-                    \item Main Control Unit merged with ALU Control
-                    \item Simplified control signal generation
-                    \item Decodes: opcode, funct3, funct7
-                \end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+
+\begin{frame}{Dataapath Components}
+    \begin{itemize}
+        \item \textbf{Program Counter (PC):} Holds address of next instruction
+        \item \textbf{Instruction Memory:} Stores program instructions
+        \item \textbf{Register File:} 32 registers for data storage and manipulation
+        \item \textbf{ALU:} Performs arithmetic and logic operations
+        \item \textbf{Data Memory:} For load/store operations
+        \item \textbf{Sign/Zero Extender:} Extends immediate values to 64 bits
+        \item \textbf{Multiplexers (MUXes):} Select between different data sources
+    \end{itemize}
 \end{frame}
 
-% ========== CONTROL UNIT TRUTH TABLE (PART 1) ==========
-\begin{frame}{Full Control Unit Truth Table (Part 1/2)}
-    \tiny
+% ========== SIMPLIFIED CONTROL TABLE (FITS BETTER) ==========
+\begin{frame}{Control Unit Signals (Selected Instructions)}
+    \scriptsize
     \centering
-    \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|}
+    \begin{tabular}{|l|c|c|c|c|c|c|c|}
         \hline
-        \textbf{Instruction} & \textbf{Opcode} & \textbf{funct3} & \textbf{funct7} & \textbf{RegWrite} & \textbf{MemRead} & \textbf{MemWrite} & \textbf{MemToReg} & \textbf{Branch} & \textbf{ALUSrc} & \textbf{ALUctl} & \textbf{pc\_src} \\
+        \textbf{Instruction} & \textbf{RegWrite} & \textbf{MemRead} & \textbf{MemWrite} & \textbf{MemToReg} & \textbf{Branch} & \textbf{ALUSrc} & \textbf{ALUOp} \\
         \hline
-        ADD & 0110011 & 000 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0010 (ADD) & 00 \\
-        SUB & 0110011 & 000 & 0100000 & 1 & 0 & 0 & 0 & 0 & 0 & 0110 (SUB) & 00 \\
-        AND & 0110011 & 111 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0000 (AND) & 00 \\
-        OR & 0110011 & 110 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0001 (OR) & 00 \\
-        XOR & 0110011 & 100 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0011 (XOR) & 00 \\
-        SLL & 0110011 & 001 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0100 (SLL) & 00 \\
-        SRL & 0110011 & 101 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0101 (SRL) & 00 \\
-        SRA & 0110011 & 101 & 0100000 & 1 & 0 & 0 & 0 & 0 & 0 & 1001 (SRA) & 00 \\
-        SLT & 0110011 & 010 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 0111 (SLT) & 00 \\
-        SLTU & 0110011 & 011 & 0000000 & 1 & 0 & 0 & 0 & 0 & 0 & 1000 (SLTU) & 00 \\
-        ADDI & 0010011 & 000 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0010 (ADD) & 00 \\
-        ANDI & 0010011 & 111 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0000 (AND) & 00 \\
-        ORI & 0010011 & 110 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0001 (OR) & 00 \\
+        R-type (add, sub, etc.) & 1 & 0 & 0 & 0 & 0 & 0 & 10 \\
+        \hline
+        addi, andi, etc. & 1 & 0 & 0 & 0 & 0 & 1 & 00 \\
+        \hline
+        ld & 1 & 1 & 0 & 1 & 0 & 1 & 00 \\
+        \hline
+        sd & 0 & 0 & 1 & X & 0 & 1 & 00 \\
+        \hline
+        beq & 0 & 0 & 0 & X & 1 & 0 & 01 \\
         \hline
     \end{tabular}
     
-    \vspace{0.2cm}
-    \textbf{Table I:} Full Control Unit Truth Table (Part 1)
-\end{frame}
-
-% ========== CONTROL UNIT TRUTH TABLE (PART 2) ==========
-\begin{frame}{Full Control Unit Truth Table (Part 2/2)}
-    \tiny
-    \centering
-    \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|}
+    \vspace{0.5cm}
+    
+    \begin{tabular}{|l|c|c|c|}
         \hline
-        \textbf{Instruction} & \textbf{Opcode} & \textbf{funct3} & \textbf{funct7} & \textbf{RegWrite} & \textbf{MemRead} & \textbf{MemWrite} & \textbf{MemToReg} & \textbf{Branch} & \textbf{ALUSrc} & \textbf{ALUctl} & \textbf{pc\_src} \\
+        \textbf{ALUOp} & \textbf{funct3} & \textbf{funct7} & \textbf{ALU Operation} \\
         \hline
-        XORI & 0010011 & 100 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0011 (XOR) & 00 \\
-        SLLI & 0010011 & 001 & 0000000 & 1 & 0 & 0 & 0 & 0 & 1 & 0100 (SLL) & 00 \\
-        SRLI & 0010011 & 101 & 0000000 & 1 & 0 & 0 & 0 & 0 & 1 & 0101 (SRL) & 00 \\
-        SRAI & 0010011 & 101 & 0100000 & 1 & 0 & 0 & 0 & 0 & 1 & 1001 (SRA) & 00 \\
-        SLTI & 0010011 & 010 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0111 (SLT) & 00 \\
-        SLTIU & 0010011 & 011 & - & 1 & 0 & 0 & 0 & 0 & 1 & 1000 (SLTU) & 00 \\
-        LW & 0000011 & 010 & - & 1 & 1 & 0 & 1 & 0 & 1 & 0010 (ADD) & 00 \\
-        SW & 0100011 & 010 & - & 0 & 0 & 1 & X & 0 & 1 & 0010 (ADD) & 00 \\
-        BEQ & 1100011 & 000 & - & 0 & 0 & 0 & X & 1 & 0 & 0110 (SUB) & 01 \\
-        JAL & 1101111 & - & - & 1 & 0 & 0 & 0 & 0 & 1 & 0010 (ADD) & 10 \\
-        JALR & 1100111 & 000 & - & 1 & 0 & 0 & 0 & 0 & 1 & 0010 (ADD) & 10 \\
-        LUI & 0110111 & - & - & 1 & 0 & 0 & 0 & 0 & 1 & 0010 (ADD) & 00 \\
-        AUIPC & 0010111 & - & - & 1 & 0 & 0 & 0 & 0 & 1 & 0010 (ADD) & 00 \\
+        00 & XXX & XXXXXXX & ADD (for loads/stores) \\
+        \hline
+        01 & XXX & XXXXXXX & SUB (for branches) \\
+        \hline
+        10 & 000 & 0000000 & ADD \\
+        \hline
+        10 & 000 & 0100000 & SUB \\
+        \hline
+        10 & 111 & 0000000 & AND \\
+        \hline
+        10 & 110 & 0000000 & OR \\
+        \hline
+        10 & 100 & 0000000 & XOR \\
         \hline
     \end{tabular}
-    
-    \vspace{0.2cm}
-    \textbf{Table I:} Full Control Unit Truth Table (Part 2)
-    
-    \begin{block}{Key Signals}
-        \begin{itemize}
-            \item \textbf{imm\_type:} 000 (I-type), 001 (S-type), 010 (B-type), 011 (U-type), 100 (J-type)
-            \item \textbf{pc\_src:} 00 (PC+4), 01 (branch), 10 (jump)
-            \item \textbf{X:} Don't care
-        \end{itemize}
-    \end{block}
 \end{frame}
 
 % ========== TEST PROGRAM ==========
@@ -276,125 +229,25 @@
     \end{columns}
 \end{frame}
 
-% ========== MODULE IMPLEMENTATION ==========
-\begin{frame}{Module Implementation: Core Components}
-    \begin{columns}[T]
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Arithmetic Logic Unit (ALU)}
-                \begin{itemize}
-                    \item Supports arithmetic, logical, and shift operations
-                    \item Required by R-type and I-type instructions
-                    \item Controlled by ALUctl signals
-                \end{itemize}
-            \end{block}
-            
-            \begin{block}{Register File}
-                \begin{itemize}
-                    \item 32 general-purpose 64-bit registers
-                    \item Register x0 hardwired to zero
-                    \item 2 read ports, 1 write port
-                \end{itemize}
-            \end{block}
-        \end{column}
-        
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Immediate Generator}
-                \begin{itemize}
-                    \item Extracts and sign-extends immediates
-                    \item Supports I, S, B, U, J types
-                    \item Generates imm\_type signal
-                \end{itemize}
-            \end{block}
-            
-            \begin{block}{Program Counter \& Branch}
-                \begin{itemize}
-                    \item PC updates every clock cycle
-                    \item Branch target: imm << 1
-                    \item Branch when Branch=1 \& Zero=1
-                \end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-\end{frame}
-
-\begin{frame}{Module Implementation: Memory \& Control}
-    \begin{columns}[T]
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Memory Units}
-                \begin{itemize}
-                    \item \textbf{Instruction Memory:} Preloaded with RISC-V machine code
-                    \item \textbf{Data Memory:} 64-bit load/store operations
-                    \item Controlled by MemRead/MemWrite signals
-                \end{itemize}
-            \end{block}
-        \end{column}
-        
-        \begin{column}{0.48\textwidth}
-            \begin{block}{Control Unit}
-                \begin{itemize}
-                    \item Decodes opcode, funct3, funct7
-                    \item Generates all control signals (see Table I)
-                    \item Determines pc\_src and imm\_type
-                    \item Merged with ALU Control
-                \end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-\end{frame}
-
 % ========== SIMULATION RESULTS ==========
 \begin{frame}{Simulation Results}
-    \begin{block}{Simulation Methodology}
-        \begin{itemize}
-            \item Verilog testbenches for verification
-            \item Vivado simulation environment
-            \item Waveform analysis
-        \end{itemize}
-    \end{block}
+    \begin{center}
+        % Use one of these lines based on which file you have:
+        \includegraphics[width=0.8\textwidth]{WhatsApp Image 2025-12-29 at 3.07.36 AM.jpeg} % Option 1: Simple filename
+        % \includegraphics[width=0.8\textwidth]{WhatsApp Image 2025-12-29 at 3.07.36 AM.jpeg} % Option 2: Original filename
+        
+        \vspace{0.3cm}
+        \footnotesize\textbf{Fig. 2:} Vivado Simulation Waveform
+    \end{center}
     
     \begin{block}{Verified Components}
         \begin{itemize}
             \item Correct PC updates and control flow
             \item Instruction execution and decoding
             \item Register file operations
-            \item ALU operations with all ALUctl codes
+            \item ALU operations
             \item Memory access operations
-            \item Branch and jump behavior
-        \end{itemize}
-    \end{block}
-\end{frame}
-
-% ========== SIMULATION WAVEFORM ==========
-\begin{frame}{Simulation Waveform}
-    \begin{center}
-        \includegraphics[width=0.9\textwidth]{}
-\begin{figure}
-            \centering
-            \includegraphics[width=0.5\linewidth]{}
-\begin{figure}
-                \centering
-                \includegraphics[width=0.75\linewidth]{}
-\begin{figure}
-                    \centering
-                    \includegraphics[width=0.75\linewidth]{WhatsApp Image 2025-12-29 at 3.07.36 AM.jpeg}
-
-                    \label{fig:placeholder}
-                \end{figure}
-                                \label{fig:placeholder}
-            \end{figure}
-        \label{fig:placeholder}
-\end{figure}
-                
-        \vspace{0.3cm}
-        \footnotesize\textbf{Fig. 2:} Vivado simulation waveform showing expected final states (registers and memory) and PC value for the test program
-    \end{center}
-    
-    \begin{block}{Waveform Analysis}
-        \begin{itemize}
-            \item Shows correct register values (x27=12, x13=17, etc.)
-            \item Demonstrates correct memory access (mem[0]=12)
-            \item Verifies proper PC sequencing
-            \item Confirms branch execution
+            \item Branch behavior
         \end{itemize}
     \end{block}
 \end{frame}
@@ -404,7 +257,7 @@
     \begin{block}{Project Achievements}
         \begin{itemize}
             \item Successfully designed and implemented 64-bit single-cycle RISC-V processor
-            \item Comprehensive control unit with full truth table
+            \item Comprehensive control unit with truth table
             \item All instruction categories supported and verified
             \item Modular Verilog implementation
             \item Complete simulation verification with Vivado
@@ -423,8 +276,8 @@
 
 % ========== REFERENCES ==========
 \begin{frame}{References}
-    \footnotesize    
-    \vspace{0.5cm}
+    \footnotesize
+       \vspace{0.5cm}
     \begin{center}
         \Large Thank You \\
         \normalsize Questions?
