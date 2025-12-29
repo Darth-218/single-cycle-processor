@@ -17,7 +17,7 @@ module single_cycle_processor_test;
 
   initial begin
     reset = 1;
-    repeat (20) @(posedge clock);
+    repeat (0.5) @(posedge clock);
     reset = 0;
 
     forever begin
