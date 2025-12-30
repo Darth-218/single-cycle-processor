@@ -90,6 +90,35 @@ module control_unit_test;
     $display("%c\t%b\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t\t%b\t%b\t%b", instr_type, instr, reg_write,
              mem_read, mem_write, mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
 
+    /* JAL */
+    instr = 32'b00000000000000000000_00000_1101111;
+    instr_type = "J";
+    #1;
+    $display("%c\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b", instr_type, instr, reg_write, mem_read, mem_write,
+             mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
+
+    /* JALR */
+    instr = 32'b000000000000_00000_000_00000_1100111;
+    instr_type = "I";
+    #1;
+    $display("%c\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b", instr_type, instr, reg_write, mem_read, mem_write,
+             mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
+
+    /* LUI */
+    instr = 32'b00000000000000000000_00000_0110111;
+    instr_type = "U";
+    #1;
+    $display("%c\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b", instr_type, instr, reg_write, mem_read, mem_write,
+             mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
+
+    /* AUIPC */
+    instr = 32'b00000000000000000000_00000_0010111;
+    instr_type = "U";
+    #1;
+    $display("%c\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b\t%b", instr_type, instr, reg_write, mem_read, mem_write,
+             mem_to_reg, branch, alu_src, alu_ctl, pc_src, imm_type);
+
+
     $finish;
   end
 
