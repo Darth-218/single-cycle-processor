@@ -1,53 +1,95 @@
+`timescale 1ns / 1ps
+
 module immediate_generator_test;
 
-  reg  [31:0] instr;
+  reg  [31:0] instruction;
+  reg  [ 2:0] imm_type;
   wire [63:0] imm;
 
-  // Instantiate DUT
   immediate_generator dut (
-      .instruction(instr),
+      .instruction(instruction),
+      .imm_type(imm_type),
       .imm(imm)
   );
 
+  task check;
+    input [63:0] exp;
+    input [127:0] msg;
+    begin
+      #1;
+      if (imm !== exp) begin
+        $display("FAIL: %s", msg);
+        $display("  instruction = %h", instruction);
+        $display("  imm_type    = %b", imm_type);
+        $display("  exp         = %h", exp);
+        $display("  got         = %h", imm);
+        $fatal;
+      end
+    end
+  endtask
+
   initial begin
-    $display("Time\tInstruction(hex)\tImmediate(decimal)");
+    $display("Starting immediate_generator tests...");
 
-    // -------------------------------------------------
-    // Test 1: I-type (addi x1, x0, 10)
-    // opcode = 0010011
-    // imm[11:0] = 10
-    instr = 32'b000000001010_00000_000_00001_0010011;
-    #5;
-    $display("%0t\t%h\t\t%0d (Expected: 10)", $time, instr, imm);
+    /* -------------------------------------------------- */
+    /* I-type positive */
+    imm_type    = 3'b000;
+    instruction = 32'h00001013; // imm = 1
+    check(64'd1, "I-type positive");
 
-    // -------------------------------------------------
-    // Test 2: I-type (addi x1, x0, -5)
-    // imm = -5 (two's complement)
-    instr = 32'b111111111011_00000_000_00001_0010011;
-    #5;
-    $display("%0t\t%h\t\t%0d (Expected: -5)", $time, instr, $signed(imm));
+    /* I-type negative */
+    instruction = 32'hFFF01013;  // imm = -1
+    check(-64'sd1, "I-type negative");
 
-    // -------------------------------------------------
-    // Test 3: S-type (sd x3, 16(x0))
-    // imm = 16
-    instr = 32'b0000000_00011_00000_011_10000_0100011;
-    #5;
-    $display("%0t\t%h\t\t%0d (Expected: 16)", $time, instr, imm);
+    /* -------------------------------------------------- */
+    /* S-type positive */
+    imm_type    = 3'b001;
+    instruction = 32'b0000000_00010_00001_010_00101_0100011; // imm = 5
+    check(64'd5, "S-type positive");
 
-    // -------------------------------------------------
-    // Test 4: B-type (beq x1, x2, 8)
-    // imm = 8
-    instr = 32'b0000000_00010_00001_000_0100_0_1100011;
-    #5;
-    $display("%0t\t%h\t\t%0d (Expected: 8)", $time, instr, imm);
+    /* S-type negative */
+    instruction = 32'b1111111_00010_00001_010_11011_0100011;  // imm = -5
+    check(-64'sd5, "S-type negative");
 
-    // -------------------------------------------------
-    // Test 5: Invalid opcode
-    instr = 32'hFFFFFFFF;
-    #5;
-    $display("%0t\t%h\t\t%0d (Expected: 0)", $time, instr, imm);
+    /* -------------------------------------------------- */
+    /* B-type positive */
+    imm_type    = 3'b010;
+    instruction = 32'b0_000001_00010_00001_000_0010_0_1100011; // imm = +4
+    check(64'd4, "B-type positive");
 
+    /* B-type negative */
+    instruction = 32'b1_111110_00010_00001_000_1110_1_1100011;  // imm = -4
+    check(-64'sd4, "B-type negative");
+
+    /* -------------------------------------------------- */
+    /* U-type positive */
+    imm_type    = 3'b011;
+    instruction = 32'h00012037; // imm = 0x00012000
+    check(64'h0000000000012000, "U-type positive");
+
+    /* U-type negative */
+    instruction = 32'hFFF12037;  // sign bit set
+    check(64'hFFFFFFFFFFF12000, "U-type negative");
+
+    /* -------------------------------------------------- */
+    /* J-type positive */
+    imm_type    = 3'b100;
+    instruction = 32'b0_0000001000_0_0000000001_1101111; // imm = +2048
+    check(64'd2048, "J-type positive");
+
+    /* J-type negative */
+    instruction = 32'b1_1111110111_1_1111111111_1101111;  // imm = -2048
+    check(-64'sd2048, "J-type negative");
+
+    /* -------------------------------------------------- */
+    /* Default */
+    imm_type    = 3'b111;
+    instruction = 32'hFFFFFFFF;
+    check(64'b0, "default case");
+
+    $display("All immediate_generator tests PASSED.");
     $finish;
   end
 
 endmodule
+

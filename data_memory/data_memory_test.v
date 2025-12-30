@@ -1,68 +1,155 @@
+`timescale 1ns / 1ps
+
 module data_memory_test;
 
-  reg         clk;
-  reg         we;
-  reg         re;
-  reg  [63:0] addr;
-  reg  [63:0] wdata;
-  wire [63:0] rdata;
+  reg         clock;
+  reg         mem_write;
+  reg         mem_read;
+  reg  [63:0] address;
+  reg  [63:0] write_data;
+  wire [63:0] read_data;
 
-  reg  [63:0] expected;
-
-  data_memory DM (
-      .clock(clk),
-      .mem_write(we),
-      .mem_read(re),
-      .address(addr),
-      .write_data(wdata),
-      .read_data(rdata)
+  data_memory dut (
+      .clock(clock),
+      .mem_write(mem_write),
+      .mem_read(mem_read),
+      .address(address),
+      .write_data(write_data),
+      .read_data(read_data)
   );
 
-  initial clk = 0;
-  always #5 clk = ~clk;
+  /* clock: 10ns period */
+  initial clock = 0;
+  always #5 clock = ~clock;
+
+  task check_read;
+    input [63:0] exp;
+    begin
+      #1;
+      if (read_data !== exp) begin
+        $display("FAIL addr=%h exp=%h got=%h", address, exp, read_data);
+        $fatal;
+      end
+    end
+  endtask
+
+  task write_word;
+    input [63:0] addr;
+    input [63:0] data;
+    begin
+      address    = addr;
+      write_data = data;
+      mem_write  = 1;
+      mem_read   = 0;
+      @(posedge clock);
+      mem_write = 0;
+    end
+  endtask
 
   initial begin
-    $display("Time\tAddr\tWE\tRE\tWData\t\t\tRData\t\t\tExpected");
+    $display("Starting data_memory tests...");
 
-    we = 1;
-    re = 0;
+    mem_write  = 0;
+    mem_read   = 0;
+    address    = 0;
+    write_data = 0;
 
-    addr = 0;
-    wdata = 64'hAAAA_BBBB_CCCC_DDDD;
-    expected = wdata;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    /* -------------------------------------------------- */
+    /* Write then read (basic) */
+    write_word(64'h0, 64'hDEADBEEFCAFEBABE);
+    mem_read = 1;
+    check_read(64'hDEADBEEFCAFEBABE);
 
-    addr = 4;
-    wdata = 64'h1234_5678_9ABC_DEF0;
-    expected = wdata;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    /* -------------------------------------------------- */
+    /* Lowest address */
+    write_word(64'h0, 64'h1111);
+    mem_read = 1;
+    check_read(64'h1111);
 
-    addr = 8;
-    wdata = 64'hDEAD_BEEF_0000_1111;
-    expected = wdata;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    /* -------------------------------------------------- */
+    /* Highest address (255) */
+    write_word(64'h3FC, 64'h2222);  // 255 << 2
+    address  = 64'h3FC;
+    mem_read = 1;
+    check_read(64'h2222);
 
-    we = 0;
-    re = 1;
+    /* -------------------------------------------------- */
+    /* Overwrite existing data */
+    write_word(64'h3FC, 64'h3333);
+    mem_read = 1;
+    check_read(64'h3333);
 
-    addr = 0;
-    expected = 64'hAAAA_BBBB_CCCC_DDDD;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    /* -------------------------------------------------- */
+    /* Read disabled */
+    mem_read = 0;
+    #1;
+    if (read_data !== 64'b0) begin
+      $display("FAIL read disabled exp=0 got=%h", read_data);
+      $fatal;
+    end
 
-    addr = 4;
-    expected = 64'h1234_5678_9ABC_DEF0;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    /* -------------------------------------------------- */
+    /* Write disabled */
+    address    = 64'h40;
+    write_data = 64'hAAAA;
+    mem_write  = 0;
+    @(posedge clock);
 
-    addr = 8;
-    expected = 64'hDEAD_BEEF_0000_1111;
-    #10;
-    $display("%0t\t%0d\t%h\t%h\t%h\t%h\t%h", $time, addr, we, re, wdata, rdata, expected);
+    mem_read = 1;
+    check_read(64'b0);  // never written
 
+    /* -------------------------------------------------- */
+    /* Multiple addresses */
+    write_word(64'h10, 64'h100);
+    write_word(64'h20, 64'h200);
+    write_word(64'h30, 64'h300);
+
+    address  = 64'h10;
+    mem_read = 1;
+    check_read(64'h100);
+    address  = 64'h20;
+    mem_read = 1;
+    check_read(64'h200);
+    address  = 64'h30;
+    mem_read = 1;
+    check_read(64'h300);
+
+    /* -------------------------------------------------- */
+    /* Back-to-back writes */
+    write_word(64'h80, 64'hAAAA);
+    write_word(64'h80, 64'hBBBB);
+    mem_read = 1;
+    address  = 64'h80;
+    check_read(64'hBBBB);
+
+    /* -------------------------------------------------- */
+    /* Read during write (old value until clock edge) */
+    write_word(64'hC0, 64'h1111);
+    address    = 64'hC0;
+    write_data = 64'h2222;
+    mem_write  = 1;
+    mem_read   = 1;
+    #1;
+    check_read(64'h1111);  // old data
+    @(posedge clock);
+    mem_write = 0;
+    check_read(64'h2222);
+
+    /* -------------------------------------------------- */
+    /* All-ones data */
+    write_word(64'h100, 64'hFFFFFFFFFFFFFFFF);
+    mem_read = 1;
+    address  = 64'h100;
+    check_read(64'hFFFFFFFFFFFFFFFF);
+
+    /* -------------------------------------------------- */
+    /* Zero data */
+    write_word(64'h140, 64'h0);
+    mem_read = 1;
+    address  = 64'h140;
+    check_read(64'h0);
+
+    $display("All data_memory tests PASSED.");
     $finish;
   end
 

@@ -1,90 +1,130 @@
+`timescale 1ns / 1ps
+
 module alu_test;
 
-  reg  [63:0] rs1;
-  reg  [63:0] rs2;
-  reg  [ 3:0] operation;
-  wire [63:0] alu_out;
+  reg  [63:0] rs1_data;
+  reg  [63:0] rs2_data;
+  reg  [ 3:0] alu_ctrl;
+  wire [63:0] result;
   wire        zero;
 
-  reg  [63:0] expected;
-
-  // Instantiate the ALU
   alu dut (
-      .a(rs1),
-      .b(rs2),
-      .alu_ctrl(operation),
-      .result(alu_out),
+      .rs1_data(rs1_data),
+      .rs2_data(rs2_data),
+      .alu_ctrl(alu_ctrl),
+      .result(result),
       .zero(zero)
   );
 
+  task check;
+    input [63:0] exp;
+    begin
+      #1;
+      if (result !== exp) begin
+        $display("FAIL ctrl=%b rs1=%h rs2=%h exp=%h got=%h", alu_ctrl, rs1_data, rs2_data, exp,
+                 result);
+        $fatal;
+      end
+      if (zero !== (exp == 64'b0)) begin
+        $display("ZERO FLAG FAIL ctrl=%b result=%h zero=%b", alu_ctrl, result, zero);
+        $fatal;
+      end
+    end
+  endtask
+
   initial begin
-    $display("Time\tRS1\t\t\tRS2\t\t\tOP\tALU_OUT\t\t\tExpected\t\tZERO");
+    $display("Starting ALU tests...");
 
-    // Test ADD
-    rs1       = 64'b0000_0000_0000_1010;  // 10
-    rs2       = 64'b0000_0000_0001_0100;  // 20
-    operation = 4'b0010;  // ADD
-    expected  = 64'b0000_0000_0001_1110;  // 30
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* ADD */
+    alu_ctrl = 4'b0000;
+    rs1_data = 64'd0;
+    rs2_data = 64'd0;
+    check(64'd0);
+    rs1_data = 64'hFFFFFFFFFFFFFFFF;
+    rs2_data = 64'd1;
+    check(64'd0);  // wrap
+    rs1_data = 64'd5;
+    rs2_data = 64'd10;
+    check(64'd15);
 
-    // Test SUB
-    rs1       = 64'b0000_0000_0001_0100;  // 20
-    rs2       = 64'b0000_0000_0000_1010;  // 10
-    operation = 4'b0110;  // SUB
-    expected  = 64'b0000_0000_0000_1010;  // 10
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* SUB */
+    alu_ctrl = 4'b0001;
+    rs1_data = 64'd10;
+    rs2_data = 64'd10;
+    check(64'd0);
+    rs1_data = 64'd0;
+    rs2_data = 64'd1;
+    check(64'hFFFFFFFFFFFFFFFF);
+    rs1_data = 64'd20;
+    rs2_data = 64'd5;
+    check(64'd15);
 
-    // Test AND
-    rs1       = 64'b0000_0000_0000_1100;  // 12
-    rs2       = 64'b0000_0000_0000_1010;  // 10
-    operation = 4'b0000;  // AND
-    expected  = 64'b0000_0000_0000_1000;  // 8
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* AND */
+    alu_ctrl = 4'b0010;
+    rs1_data = 64'hFFFF0000FFFF0000;
+    rs2_data = 64'h0F0F0F0F0F0F0F0F;
+    check(64'h0F0F00000F0F0000);
 
-    // Test OR
-    rs1       = 64'b0000_0000_0000_1100;  // 12
-    rs2       = 64'b0000_0000_0000_0101;  // 5
-    operation = 4'b0001;  // OR
-    expected  = 64'b0000_0000_0000_1101;  // 13
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* OR */
+    alu_ctrl = 4'b0011;
+    check(64'hFFFF0F0FFFFF0F0F);
 
-    // Test XOR
-    rs1       = 64'b0000_0000_0000_1100;  // 12
-    rs2       = 64'b0000_0000_0000_1010;  // 10
-    operation = 4'b0011;  // XOR
-    expected  = 64'b0000_0000_0000_0110;  // 6
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* XOR */
+    alu_ctrl = 4'b0100;
+    check(64'hF0F00F0FF0F00F0F);
 
-    // Test SLL
-    rs1       = 64'b0000_0000_0000_0011;  // 3
-    rs2       = 64'b0000_0000_0000_0001;  // 1
-    operation = 4'b0100;  // SLL
-    expected  = 64'b0000_0000_0000_0110;  // 6
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* SLT (signed) */
+    alu_ctrl = 4'b0101;
+    rs1_data = -64'sd1;
+    rs2_data = 64'sd1;
+    check(64'd1);
+    rs1_data = 64'sd5;
+    rs2_data = 64'sd5;
+    check(64'd0);
+    rs1_data = 64'sd10;
+    rs2_data = -64'sd1;
+    check(64'd0);
 
-    // Test SRL
-    rs1       = 64'b0000_0000_0000_1000;  // 8
-    rs2       = 64'b0000_0000_0000_0001;  // 1
-    operation = 4'b0101;  // SRL
-    expected  = 64'b0000_0000_0000_0100;  // 4
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* SLL */
+    alu_ctrl = 4'b0110;
+    rs1_data = 64'h1;
+    rs2_data = 64'd0;
+    check(64'h1);
+    rs1_data = 64'h1;
+    rs2_data = 64'd63;
+    check(64'h8000000000000000);
 
-    // Test SRA
-    rs1       = 64'b1111_1111_1111_1000;  // -8
-    rs2       = 64'b0000_0000_0000_0001;  // 1
-    operation = 4'b1001;  // SRA
-    expected  = 64'b1111_1111_1111_1100;  // -4
-    #1;
-    $display("%0t\t%h\t%h\t%h\t%h\t%h\t%h", $time, rs1, rs2, operation, alu_out, expected, zero);
+    /* SRL */
+    alu_ctrl = 4'b0111;
+    rs1_data = 64'h8000000000000000;
+    rs2_data = 64'd63;
+    check(64'h1);
 
-    $display("ALU test complete.");
+    /* SRA */
+    alu_ctrl = 4'b1000;
+    rs1_data = -64'sd1;
+    rs2_data = 64'd4;
+    check(64'hFFFFFFFFFFFFFFFF);
+    rs1_data = -64'sd8;
+    rs2_data = 64'd2;
+    check(-64'sd2);
+
+    /* SLTU */
+    alu_ctrl = 4'b1001;
+    rs1_data = 64'hFFFFFFFFFFFFFFFF;
+    rs2_data = 64'h0;
+    check(64'd0);
+    rs1_data = 64'h1;
+    rs2_data = 64'h2;
+    check(64'd1);
+
+    /* DEFAULT */
+    alu_ctrl = 4'b1111;
+    rs1_data = 64'h1234;
+    rs2_data = 64'h5678;
+    check(64'd0);
+
+    $display("All ALU tests PASSED.");
     $finish;
   end
 

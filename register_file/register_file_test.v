@@ -1,84 +1,130 @@
+`timescale 1ns / 1ps
+
 module register_file_test;
 
-  reg         clk;
-  reg         RegWrite;
-  reg  [ 4:0] rs1;
-  reg  [ 4:0] rs2;
-  reg  [ 4:0] rd;
-  reg  [63:0] writeData;
-
-  wire [63:0] readData1;
-  wire [63:0] readData2;
+  reg         clock;
+  reg         reg_write;
+  reg  [ 4:0] rs1_address;
+  reg  [ 4:0] rs2_address;
+  reg  [ 4:0] rd_address;
+  reg  [63:0] write_data;
+  wire [63:0] rs1_data;
+  wire [63:0] rs2_data;
 
   register_file dut (
-      .clock(clk),
-      .reg_write(RegWrite),
-      .rs1_address(rs1),
-      .rs2_address(rs2),
-      .rd_address(rd),
-      .write_data(writeData),
-      .rs1_data(readData1),
-      .rs2_data(readData2)
+      .clock(clock),
+      .reg_write(reg_write),
+      .rs1_address(rs1_address),
+      .rs2_address(rs2_address),
+      .rd_address(rd_address),
+      .write_data(write_data),
+      .rs1_data(rs1_data),
+      .rs2_data(rs2_data)
   );
 
-  // Clock generator
-  always #5 clk = ~clk;
+  /* 10ns clock */
+  initial clock = 0;
+  always #5 clock = ~clock;
+
+  task check;
+    input [63:0] got;
+    input [63:0] exp;
+    input [127:0] msg;
+    begin
+      #1;
+      if (got !== exp) begin
+        $display("FAIL: %s | exp=%h got=%h", msg, exp, got);
+        $fatal;
+      end
+    end
+  endtask
+
+  task write_reg;
+    input [4:0] addr;
+    input [63:0] data;
+    begin
+      rd_address = addr;
+      write_data = data;
+      reg_write  = 1;
+      @(posedge clock);
+      reg_write = 0;
+    end
+  endtask
 
   initial begin
-    $display("Time\tRegWrite\trd\trs1\trs2\tWriteData\tReadData1\tReadData2");
+    $display("Starting register_file tests...");
 
-    // Initialize
-    clk = 0;
-    RegWrite = 0;
-    rs1 = 0;
-    rs2 = 0;
-    rd = 0;
-    writeData = 0;
+    /* defaults */
+    reg_write   = 0;
+    rs1_address = 0;
+    rs2_address = 0;
+    rd_address  = 0;
+    write_data  = 0;
 
-    #10;
+    /* -------------------------------------------------- */
+    /* x0 always reads zero */
+    rs1_address = 0;
+    rs2_address = 0;
+    check(rs1_data, 64'b0, "x0 rs1 read");
+    check(rs2_data, 64'b0, "x0 rs2 read");
 
-    RegWrite = 1;
-    rd = 5;
-    writeData = 64'd10;
-    #10;
-    $display("%0t\t%b\t\t%0d\t%0d\t%0d\t%0d\t\t-\t\t-", $time, RegWrite, rd, rs1, rs2, writeData);
+    /* -------------------------------------------------- */
+    /* Write to x0 ignored */
+    write_reg(5'd0, 64'hDEADBEEF);
+    check(rs1_data, 64'b0, "x0 write ignored");
 
-    // Read x5
-    RegWrite = 0;
-    rs1 = 5;
-    #5;
-    $display("%0t\t%b\t\t-\t%0d\t-\t-\t\t%0d\t\t-\t(Expected: 10)", $time, RegWrite, rs1,
-             readData1);
+    /* -------------------------------------------------- */
+    /* Write and read normal register */
+    write_reg(5'd5, 64'h1111);
+    rs1_address = 5'd5;
+    check(rs1_data, 64'h1111, "write/read x5");
 
-    // Test 2: Write 25 to x3
-    RegWrite = 1;
-    rd = 3;
-    writeData = 64'd25;
-    #10;
-    $display("%0t\t%b\t\t%0d\t-\t-\t%0d\t\t-\t\t-", $time, RegWrite, rd, writeData);
+    /* -------------------------------------------------- */
+    /* Write disabled */
+    rd_address = 5'd6;
+    write_data = 64'h2222;
+    reg_write  = 0;
+    @(posedge clock);
 
-    // Read x3 and x5
-    RegWrite = 0;
-    rs1 = 3;
-    rs2 = 5;
-    #5;
-    $display("%0t\t%b\t\t-\t%0d\t%0d\t-\t\t%0d\t\t%0d\t(Expected: 25, 10)", $time, RegWrite, rs1,
-             rs2, readData1, readData2);
+    rs1_address = 5'd6;
+    check(rs1_data, 64'b0, "write disabled");
 
-    // Test 3: Try to write to x0
-    RegWrite = 1;
-    rd = 0;
-    writeData = 64'd99;
-    #10;
-    $display("%0t\t%b\t\t%0d\t-\t-\t%0d\t\t-\t\t-\t(Write to x0 ignored)", $time, RegWrite, rd,
-             writeData);
+    /* -------------------------------------------------- */
+    /* Overwrite register */
+    write_reg(5'd5, 64'h3333);
+    rs1_address = 5'd5;
+    check(rs1_data, 64'h3333, "overwrite x5");
 
-    // Read x0
-    RegWrite = 0;
-    rs1 = 0;
-    #5;
-    $display("%0t\t%b\t\t-\t%0d\t-\t-\t\t%0d\t\t-\t(Expected: 0)", $time, RegWrite, rs1, readData1);
+    /* -------------------------------------------------- */
+    /* Two read ports */
+    write_reg(5'd10, 64'hAAAA);
+    write_reg(5'd11, 64'hBBBB);
 
+    rs1_address = 5'd10;
+    rs2_address = 5'd11;
+    check(rs1_data, 64'hAAAA, "rs1 read");
+    check(rs2_data, 64'hBBBB, "rs2 read");
+
+    /* -------------------------------------------------- */
+    /* Same register on both ports */
+    rs1_address = 5'd10;
+    rs2_address = 5'd10;
+    check(rs1_data, 64'hAAAA, "same reg rs1");
+    check(rs2_data, 64'hAAAA, "same reg rs2");
+
+    /* -------------------------------------------------- */
+    /* Highest register (x31) */
+    write_reg(5'd31, 64'hFFFFFFFFFFFFFFFF);
+    rs1_address = 5'd31;
+    check(rs1_data, 64'hFFFFFFFFFFFFFFFF, "x31 read");
+
+    /* -------------------------------------------------- */
+    /* x0 forced back to zero every clock */
+    @(posedge clock);
+    rs1_address = 0;
+    check(rs1_data, 64'b0, "x0 forced zero");
+
+    $display("All register_file tests PASSED.");
     $finish;
   end
 
