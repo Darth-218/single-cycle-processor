@@ -42,7 +42,7 @@ module alu_test;
     check(64'd0);
     rs1_data = 64'hFFFFFFFFFFFFFFFF;
     rs2_data = 64'd1;
-    check(64'd0);  // wrap
+    check(64'd0);
     rs1_data = 64'd5;
     rs2_data = 64'd10;
     check(64'd15);
@@ -73,7 +73,7 @@ module alu_test;
     alu_ctrl = 4'b0100;
     check(64'hF0F00F0FF0F00F0F);
 
-    /* SLT (signed) */
+    /* SLT */
     alu_ctrl = 4'b0101;
     rs1_data = -64'sd1;
     rs2_data = 64'sd1;
