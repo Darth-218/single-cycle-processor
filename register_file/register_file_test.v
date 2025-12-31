@@ -26,15 +26,15 @@ module register_file_test;
   initial clock = 0;
   always #5 clock = ~clock;
 
-  task check;
+  task check; /* Compares actual vs expected */
     input [63:0] got;
     input [63:0] exp;
     input [127:0] msg;
     begin
-      #1;
+      #1; // Wait 1 time unit for signals to stabilize
       if (got !== exp) begin
         $display("FAIL: %s | exp=%h got=%h", msg, exp, got);
-        $fatal;
+        $fatal; // Stop simulation on failure
       end
     end
   endtask
